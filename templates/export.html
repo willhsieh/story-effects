@@ -7,12 +7,6 @@
     <title>Story Effects</title>
   </head>
   <body>
-    <h1>Upload here:</h1>
-    <form method="POST" action="" enctype="multipart/form-data">
-      <p><input type="file" name="file"></p>
-      <p><input type="submit" value="Submit"></p>
-    </form>
-    <hr>
     {% for file in files %}
       <h1>Download below:</h1>
       <img src="{{ url_for('export', filename = file) }}">

@@ -23,8 +23,10 @@ def validate_image(stream):
 
 @app.route('/')
 def index():
-    files = os.listdir(app.config['UPLOAD_PATH'])
-    return render_template('index.html', files=files)
+    files = os.listdir(app.config['EXPORT_PATH'])
+    for file in files:
+        os.remove(os.path.join(app.config['EXPORT_PATH'], file))
+    return render_template('index.html')
 
 @app.route('/', methods=['POST'])
 def upload_files():
@@ -35,14 +37,21 @@ def upload_files():
         if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_image(uploaded_file.stream):
             abort(400)
         uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+
+        # convert here
         imageconvert(filename)
 
-    return redirect(url_for('index'))
+    os.remove(os.path.join(app.config['UPLOAD_PATH'], filename))
+    return redirect(url_for('exports'))
 
 @app.route('/media/exports/<filename>')
 def export(filename):
     return send_from_directory(app.config['EXPORT_PATH'], filename)
 
+@app.route('/exports')
+def exports():
+    files = os.listdir(app.config['EXPORT_PATH'])
+    return render_template('export.html', files=files)
 
 
 # -------------------------------- #
