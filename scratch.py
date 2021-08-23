@@ -1,65 +1,57 @@
-# Instagram Story Effects
-# Copyright (C) 2021 William Hsieh - All Rights Reserved
-# MIT License
-
-# Add story filters to existing photos
-
+import os
+import imghdr
+from flask import Flask, render_template, request, redirect, url_for, abort, send_from_directory
+from werkzeug.utils import secure_filename
 from PIL import Image, ImageFont, ImageDraw
 from PIL.ExifTags import TAGS
 from datetime import datetime
 
-# import image, resize to 1080 by 1920
-img = Image.open("ball.jpg")
+# https://blog.miguelgrinberg.com/post/handling-file-uploads-with-flask
+app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 4096 * 4096
+app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png']
+app.config['UPLOAD_PATH'] = 'media/uploads'
+app.config['EXPORT_PATH'] = 'media/exports'
 
-# https://stackoverflow.com/a/4744625/16074281
-aspect = 1.0 * img.width / img.height
-ideal_aspect = 9.0 / 16.0 # Instagram stories are 9:16
+def validate_image(stream):
+    header = stream.read(512)
+    stream.seek(0) 
+    format = imghdr.what(None, header)
+    if not format:
+        return None
+    return '.' + (format if format != 'jpeg' else 'jpg')
 
-if aspect > ideal_aspect: # too wide
-    new_width = int(ideal_aspect * img.height)
-    offset = (img.width - new_width) / 2
-    resize = (offset, 0, img.width - offset, img.height)
-else: # too narrow
-    new_height = int(img.width / ideal_aspect)
-    offset = (img.height - new_height) / 2
-    resize = (0, offset, img.width, img.height - offset)
+@app.route('/')
+def index():
+    files = os.listdir(app.config['EXPORT_PATH'])
+    for file in files:
+        if file != "sample.jpg":
+            os.remove(os.path.join(app.config['EXPORT_PATH'], file))
+    return render_template('index.html')
 
-img = img.crop(resize).resize((1080, 1920), Image.ANTIALIAS)
+@app.route('/', methods=['POST'])
+def upload_files():
+    uploaded_file = request.files['file']
+    filename = secure_filename(uploaded_file.filename)
+    if filename != '':
+        file_ext = os.path.splitext(filename)[1]
+        if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_image(uploaded_file.stream):
+            abort(400)
+        uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
 
+        # convert here
+        imageconvert(filename)
 
-# set font and font sizes for date and time
-date_font = ImageFont.truetype('WestwoodSans-Regular.ttf', 80)
-time_font = ImageFont.truetype('WestwoodSans-Regular.ttf', 40)
+    if filename != "sample.jpg":
+        os.remove(os.path.join(app.config['UPLOAD_PATH'], filename))
+    return redirect(url_for('exports'))
 
-# date and time text
+@app.route('/media/exports/<filename>')
+def export(filename):
+    return send_from_directory(app.config['EXPORT_PATH'], filename)
 
-# using system time:
-today = datetime.today()
-now = datetime.now()
-
-# using photo metadata:
-exifdata = img.getexif()
-
-# iterating over all EXIF data fields
-for tag_id in exifdata:
-    # get the tag name, instead of human unreadable tag id
-    tag = TAGS.get(tag_id, tag_id)
-    data = exifdata.get(tag_id)
-    # decode bytes 
-    if isinstance(data, bytes):
-        data = data.decode()
-    print(f"{tag:25}: {data}")
-
-# row 39 is datetime data
-now = exifdata.get(36867)
-if isinstance(now, bytes):
-    now = now.decode()
-now = datetime.strptime(now, '%Y:%m:%d %H:%M:%S')
-
-# day of week is stored as int from 0 to 6
-dayofweek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-date_text = dayofweek[now.weekday()]
-date_text = date_text.upper()
-
-# convert time to 12 hour time w/ AM/PM
-time_text = now.strftime("%I:%M %p")
+@app.route('/exports')
+def exports():
+    files = os.listdir(app.config['EXPORT_PATH'])
+    print(files)
+    return render_template('export.html', files=files)

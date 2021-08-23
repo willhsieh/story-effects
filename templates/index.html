@@ -13,9 +13,5 @@
       <p><input type="submit" value="Submit"></p>
     </form>
     <hr>
-    {% for file in files %}
-      <h1>Download below:</h1>
-      <img src="{{ url_for('export', filename = file) }}">
-    {% endfor %}
   </body>
 </html>

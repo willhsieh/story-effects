@@ -8,8 +8,8 @@ from datetime import datetime
 
 # https://blog.miguelgrinberg.com/post/handling-file-uploads-with-flask
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 4096 * 4096
-app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png']
+app.config['MAX_CONTENT_LENGTH'] = 26214400 # 25MB max
+app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png', '.jpeg']
 app.config['UPLOAD_PATH'] = 'media/uploads'
 app.config['EXPORT_PATH'] = 'media/exports'
 
@@ -34,14 +34,15 @@ def upload_files():
     filename = secure_filename(uploaded_file.filename)
     if filename != '':
         file_ext = os.path.splitext(filename)[1]
-        if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_image(uploaded_file.stream):
+        if file_ext not in app.config['UPLOAD_EXTENSIONS']:
             abort(400)
         uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
 
         # convert here
         imageconvert(filename)
 
-    os.remove(os.path.join(app.config['UPLOAD_PATH'], filename))
+    if filename != "favicon.ico":
+        os.remove(os.path.join(app.config['UPLOAD_PATH'], filename))
     return redirect(url_for('exports'))
 
 @app.route('/media/exports/<filename>')
@@ -186,5 +187,5 @@ def imageconvert(imagepath):
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=True)
     
