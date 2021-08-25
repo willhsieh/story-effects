@@ -24,14 +24,15 @@ This blog post goes into more detail: [link coming soon(tm)]
 
 Okay here you go:
 
-![balloon](media\other\balloon.jpg)
+![balloon](media/other/balloon.jpg)
 
-![drone](media\other\drone.jpg)
+![drone](media/other/drone.jpg)
 
-![pens](media\other\pens.jpg)
+![pens](media/other/pens.jpg)
 
-![stars](media\other\stars.jpg)
+![stars](media/other/stars.jpg)
 
 ## License
 
 MIT License
+
