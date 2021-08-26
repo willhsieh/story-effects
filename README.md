@@ -18,7 +18,7 @@ I tried making an Instagram story effect that would work on existing media, but 
 
 ## I still have more questions
 
-This blog post goes into more detail: [Creating Instagram Story Effects but Better](https://willhsieh.com/posts/creating-instagram-story-effects-but-better/)
+This blog post goes into more detail: [Creating Instagram Story Effects But Better](https://willhsieh.com/posts/creating-instagram-story-effects-but-better/)
 
 ## I want to see it
 
