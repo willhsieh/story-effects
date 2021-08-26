@@ -32,6 +32,14 @@ Okay here you go:
 
 ![stars](media/other/stars.jpg)
 
+## Sources I used
+
+[Real Python - Flask](https://realpython.com/python-web-applications/)
+
+[Miguel Grinberg - Handling File Uploads with Flask](https://blog.miguelgrinberg.com/post/handling-file-uploads-with-flask)
+
+[Changing image aspect ratios](https://stackoverflow.com/a/4744625/16074281)
+
 ## License
 
 MIT License
